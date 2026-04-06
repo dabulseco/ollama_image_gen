@@ -85,10 +85,6 @@ def main() -> None:
     render_main_panels(available_models, ollama_ok)
 
 
-if __name__ == "__main__":
-    main()
-
-
 def render_top_bar(available_models: list[str], ollama_ok: bool) -> None:
     col_model, col_style, col_size, col_spacer, col_reset = st.columns(
         [2, 2, 2.5, 2, 1], vertical_alignment="bottom"
@@ -305,3 +301,6 @@ def _save_image(image_bytes: bytes, fmt: str) -> None:
     st.session_state["status_message"] = f"Saved to {out_path}"
     st.session_state["status_ok"] = True
     st.rerun()
+
+
+main()
