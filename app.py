@@ -116,4 +116,72 @@ def render_top_bar(available_models: list[str], ollama_ok: bool) -> None:
 
 
 def render_main_panels(available_models: list[str], ollama_ok: bool) -> None:
-    st.write("MAIN PANELS — coming in Task 6+")
+    left_col, right_col = st.columns([3, 2])
+
+    with right_col:
+        render_settings_panel(available_models, ollama_ok)
+
+    with left_col:
+        render_preview_panel()
+
+
+def render_settings_panel(available_models: list[str], ollama_ok: bool) -> None:
+    st.text_area(
+        "Prompt",
+        key="prompt_text",
+        height=120,
+        placeholder="Describe the image you want to generate...",
+    )
+
+    with st.expander("Negative Prompt (optional)"):
+        st.text_area(
+            "Negative prompt",
+            key="negative_prompt_text",
+            height=80,
+            placeholder="blurry, low quality, watermark, text...",
+            label_visibility="collapsed",
+        )
+
+    with st.expander("Advanced Settings"):
+        adv_col1, adv_col2 = st.columns(2)
+        with adv_col1:
+            st.number_input("Seed", min_value=0, value=0, step=1, key="seed_value",
+                            help="0 = random each time")
+        with adv_col2:
+            st.number_input("Steps", min_value=0, value=0, step=1, key="steps_value",
+                            help="0 = model default")
+
+    can_generate = ollama_ok and bool(available_models)
+    if st.button(
+        "✨ Generate Image",
+        type="primary",
+        use_container_width=True,
+        disabled=not can_generate,
+    ):
+        st.session_state["show_save_options"] = False
+        run_generation()
+
+    # Status indicator
+    if not ollama_ok:
+        st.error("✗ Ollama not reachable — is it running? `ollama serve`")
+    elif not available_models:
+        st.warning(
+            "No image models found. Install one:\n\n"
+            "`ollama pull x/z-image-turbo`\n\n"
+            "`ollama pull x/flux2-klein`"
+        )
+    elif st.session_state.get("status_message"):
+        if st.session_state["status_ok"]:
+            st.success(st.session_state["status_message"])
+        else:
+            st.error(st.session_state["status_message"])
+    else:
+        st.success("✓ Ready — Ollama connected")
+
+
+def render_preview_panel() -> None:
+    st.write("PREVIEW PANEL — coming in Task 7")
+
+
+def run_generation() -> None:
+    st.write("GENERATION — coming in Task 7")
