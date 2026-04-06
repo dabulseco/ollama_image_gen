@@ -179,9 +179,88 @@ def render_settings_panel(available_models: list[str], ollama_ok: bool) -> None:
         st.success("✓ Ready — Ollama connected")
 
 
-def render_preview_panel() -> None:
-    st.write("PREVIEW PANEL — coming in Task 7")
-
-
 def run_generation() -> None:
-    st.write("GENERATION — coming in Task 7")
+    model = st.session_state.get("selected_model", "")
+    style_label = st.session_state.get("selected_style", "None")
+    size_label = st.session_state.get("selected_size", list(SIZE_PRESETS.keys())[0])
+    prompt_text = st.session_state.get("prompt_text", "").strip()
+    negative_prompt = st.session_state.get("negative_prompt_text", "").strip()
+    seed = int(st.session_state.get("seed_value", 0))
+    steps = int(st.session_state.get("steps_value", 0))
+
+    if not prompt_text:
+        st.session_state["status_message"] = "Please enter a prompt before generating."
+        st.session_state["status_ok"] = False
+        return
+
+    style_prefix = STYLE_PRESETS.get(style_label, "")
+    full_prompt = build_prompt(style_prefix, prompt_text)
+    width, height = SIZE_PRESETS[size_label]
+
+    payload = build_generate_payload(
+        model=model,
+        prompt=full_prompt,
+        width=width,
+        height=height,
+        negative_prompt=negative_prompt,
+        seed=seed,
+        steps=steps,
+    )
+    st.session_state["last_request"] = payload
+
+    with st.spinner("Generating image..."):
+        try:
+            resp = requests.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json=payload,
+                timeout=300,
+            )
+            resp.raise_for_status()
+            image_bytes = decode_image_bytes(resp.json())
+        except ValueError as e:
+            st.session_state["status_message"] = f"Model returned no image. {e}"
+            st.session_state["status_ok"] = False
+            return
+        except requests.RequestException as e:
+            st.session_state["status_message"] = f"Generation failed: {e}"
+            st.session_state["status_ok"] = False
+            return
+
+    st.session_state["last_image"] = image_bytes
+    st.session_state["status_message"] = "Image generated successfully."
+    st.session_state["status_ok"] = True
+
+
+def render_preview_panel() -> None:
+    image_bytes = st.session_state.get("last_image")
+
+    if image_bytes:
+        st.image(image_bytes, use_container_width=True)
+    else:
+        st.markdown(
+            """
+            <div style='border: 2px dashed #555; border-radius:10px;
+                        min-height:300px; display:flex; align-items:center;
+                        justify-content:center; color:#888;'>
+              <p style='font-size:1.1em;'>🖼️ Generated image will appear here</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    if image_bytes:
+        btn_col1, btn_col2 = st.columns(2)
+        with btn_col1:
+            if st.button("💾 Save Image", use_container_width=True):
+                st.session_state["show_save_options"] = True
+        with btn_col2:
+            if st.button("🔄 Regenerate", use_container_width=True):
+                st.session_state["show_save_options"] = False
+                run_generation()
+
+        if st.session_state.get("show_save_options"):
+            render_save_panel(image_bytes)
+
+
+def render_save_panel(image_bytes: bytes) -> None:
+    st.write("SAVE PANEL — coming in Task 8")
