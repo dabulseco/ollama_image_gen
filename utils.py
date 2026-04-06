@@ -1,9 +1,6 @@
 import base64
-import io
 import os
 from datetime import datetime
-
-from PIL import Image
 
 
 def filter_image_models(installed: list[str], allowlist: list[str]) -> list[str]:
