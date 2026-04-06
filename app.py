@@ -77,9 +77,8 @@ def main() -> None:
 
     ollama_ok = check_ollama_health()
     installed = get_installed_model_names() if ollama_ok else []
-    available_models = filter_image_models(
-        [m.split(":")[0] for m in installed], IMAGE_CAPABLE_MODELS
-    )
+    allowlist_set = set(IMAGE_CAPABLE_MODELS)
+    available_models = [m for m in installed if m.split(":")[0] in allowlist_set]
 
     render_top_bar(available_models, ollama_ok)
     render_main_panels(available_models, ollama_ok)
