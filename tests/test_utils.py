@@ -2,15 +2,18 @@ import base64
 import io
 import os
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from PIL import Image
 
 from utils import (
+    build_generate_payload,
     build_prompt,
+    check_ollama_health,
     decode_image_bytes,
     filter_image_models,
+    get_installed_model_names,
     get_model_short_name,
     get_output_path,
 )
@@ -90,10 +93,6 @@ def test_decode_image_bytes_empty_images_list():
     with pytest.raises(ValueError, match="No image"):
         decode_image_bytes({"images": [], "done": True})
 
-
-from unittest.mock import MagicMock, patch
-
-from utils import build_generate_payload, check_ollama_health, get_installed_model_names
 
 
 def test_check_ollama_health_when_running():
