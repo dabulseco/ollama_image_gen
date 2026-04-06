@@ -296,7 +296,7 @@ def _save_image(image_bytes: bytes, fmt: str) -> None:
         img = Image.open(io.BytesIO(image_bytes))
         pil_format = "JPEG" if fmt == "JPEG" else fmt
         img.save(out_path, format=pil_format)
-    except OSError as e:
+    except Exception as e:
         st.session_state["status_message"] = f"Save failed ({out_path}): {e}"
         st.session_state["status_ok"] = False
         return
