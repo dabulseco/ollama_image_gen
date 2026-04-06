@@ -263,4 +263,45 @@ def render_preview_panel() -> None:
 
 
 def render_save_panel(image_bytes: bytes) -> None:
-    st.write("SAVE PANEL — coming in Task 8")
+    st.divider()
+    fmt_col, save_col = st.columns([2, 1])
+
+    with fmt_col:
+        fmt = st.radio(
+            "Save as",
+            ["PNG", "WebP", "JPEG"],
+            horizontal=True,
+            key="save_format",
+        )
+
+    with save_col:
+        st.write("")  # spacing
+        if st.button("Confirm Save →", type="primary", use_container_width=True):
+            _save_image(image_bytes, fmt)
+
+
+def _save_image(image_bytes: bytes, fmt: str) -> None:
+    try:
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+    except OSError as e:
+        st.session_state["status_message"] = f"Cannot create output folder: {e}"
+        st.session_state["status_ok"] = False
+        return
+
+    model = st.session_state.get("selected_model", "unknown")
+    ext = fmt.lower()
+    out_path = get_output_path(OUTPUT_DIR, model, ext)
+
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        pil_format = "JPEG" if fmt == "JPEG" else fmt
+        img.save(out_path, format=pil_format)
+    except OSError as e:
+        st.session_state["status_message"] = f"Save failed ({out_path}): {e}"
+        st.session_state["status_ok"] = False
+        return
+
+    st.session_state["show_save_options"] = False
+    st.session_state["status_message"] = f"Saved to {out_path}"
+    st.session_state["status_ok"] = True
+    st.rerun()
