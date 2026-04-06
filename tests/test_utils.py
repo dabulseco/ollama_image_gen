@@ -89,3 +89,99 @@ def test_decode_image_bytes_missing_images_key():
 def test_decode_image_bytes_empty_images_list():
     with pytest.raises(ValueError, match="No image"):
         decode_image_bytes({"images": [], "done": True})
+
+
+from unittest.mock import MagicMock, patch
+
+from utils import build_generate_payload, check_ollama_health, get_installed_model_names
+
+
+def test_check_ollama_health_when_running():
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    with patch("utils.requests.get", return_value=mock_resp):
+        assert check_ollama_health("http://localhost:11434") is True
+
+
+def test_check_ollama_health_when_down():
+    with patch("utils.requests.get", side_effect=Exception("connection refused")):
+        assert check_ollama_health("http://localhost:11434") is False
+
+
+def test_get_installed_model_names_returns_names():
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {
+        "models": [
+            {"name": "llama3:latest"},
+            {"name": "x/z-image-turbo:latest"},
+        ]
+    }
+    with patch("utils.requests.get", return_value=mock_resp):
+        names = get_installed_model_names("http://localhost:11434")
+    assert "llama3:latest" in names
+    assert "x/z-image-turbo:latest" in names
+
+
+def test_get_installed_model_names_ollama_down():
+    with patch("utils.requests.get", side_effect=Exception("down")):
+        assert get_installed_model_names("http://localhost:11434") == []
+
+
+def test_build_generate_payload_basic():
+    payload = build_generate_payload(
+        model="x/z-image-turbo",
+        prompt="a cat",
+        width=512,
+        height=512,
+        negative_prompt="",
+        seed=0,
+        steps=0,
+    )
+    assert payload["model"] == "x/z-image-turbo"
+    assert payload["prompt"] == "a cat"
+    assert payload["stream"] is False
+    assert payload["options"]["width"] == 512
+    assert payload["options"]["height"] == 512
+
+
+def test_build_generate_payload_omits_zero_seed_and_steps():
+    payload = build_generate_payload(
+        model="x/z-image-turbo",
+        prompt="a cat",
+        width=512,
+        height=512,
+        negative_prompt="",
+        seed=0,
+        steps=0,
+    )
+    assert "seed" not in payload["options"]
+    assert "num_inference_steps" not in payload["options"]
+
+
+def test_build_generate_payload_includes_nonzero_seed_and_steps():
+    payload = build_generate_payload(
+        model="x/z-image-turbo",
+        prompt="a cat",
+        width=512,
+        height=512,
+        negative_prompt="blurry",
+        seed=42,
+        steps=20,
+    )
+    assert payload["options"]["seed"] == 42
+    assert payload["options"]["num_inference_steps"] == 20
+    assert payload["negative_prompt"] == "blurry"
+
+
+def test_build_generate_payload_omits_empty_negative_prompt():
+    payload = build_generate_payload(
+        model="x/z-image-turbo",
+        prompt="a cat",
+        width=512,
+        height=512,
+        negative_prompt="",
+        seed=0,
+        steps=0,
+    )
+    assert "negative_prompt" not in payload
