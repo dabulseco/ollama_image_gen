@@ -33,11 +33,18 @@ def get_output_path(output_dir: str, model_name: str, ext: str) -> str:
 
 
 def decode_image_bytes(response_json: dict) -> bytes:
-    """Extract and decode the base64 image from an Ollama generate response."""
+    """Extract and decode the base64 image from an Ollama generate response.
+
+    Tries images[0] first (Ollama diffusion models), then falls back to
+    the response field (older Ollama builds).
+    """
     images = response_json.get("images")
-    if not images:
-        raise ValueError("No image data in Ollama response")
-    return base64.b64decode(images[0])
+    if images:
+        return base64.b64decode(images[0])
+    response_b64 = response_json.get("response", "").strip()
+    if response_b64:
+        return base64.b64decode(response_b64)
+    raise ValueError("No image data in Ollama response")
 
 
 OLLAMA_BASE_URL = "http://localhost:11434"
@@ -71,19 +78,23 @@ def build_generate_payload(
     seed: int,
     steps: int,
 ) -> dict:
-    """Build the JSON payload for POST /api/generate."""
-    options: dict = {"width": width, "height": height}
+    """Build the JSON payload for POST /api/generate.
+
+    width/height/steps are kept as parameters for future use but are not
+    sent to Ollama — diffusion models ignore or reject these options fields.
+    Only seed is passed when non-zero, as it is broadly supported.
+    """
+    options: dict = {}
     if seed != 0:
         options["seed"] = seed
-    if steps != 0:
-        options["num_inference_steps"] = steps
 
     payload: dict = {
         "model": model,
         "prompt": prompt,
         "stream": False,
-        "options": options,
     }
+    if options:
+        payload["options"] = options
     if negative_prompt:
         payload["negative_prompt"] = negative_prompt
     return payload
