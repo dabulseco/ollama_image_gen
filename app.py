@@ -90,7 +90,29 @@ if __name__ == "__main__":
 
 
 def render_top_bar(available_models: list[str], ollama_ok: bool) -> None:
-    st.write("TOP BAR — coming in Task 5")
+    col_model, col_style, col_size, col_spacer, col_reset = st.columns(
+        [2, 2, 2.5, 2, 1], vertical_alignment="bottom"
+    )
+
+    with col_model:
+        if available_models:
+            st.selectbox("Model", available_models, key="selected_model")
+        else:
+            st.selectbox("Model", ["No image models found"], key="selected_model", disabled=True)
+
+    with col_style:
+        st.selectbox("Style", list(STYLE_PRESETS.keys()), key="selected_style")
+
+    with col_size:
+        st.selectbox(
+            "Size",
+            list(SIZE_PRESETS.keys()),
+            key="selected_size",
+        )
+
+    with col_reset:
+        if st.button("↺ Reset", type="secondary", use_container_width=True):
+            reset_state()
 
 
 def render_main_panels(available_models: list[str], ollama_ok: bool) -> None:
