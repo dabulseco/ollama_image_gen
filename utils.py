@@ -35,9 +35,12 @@ def get_output_path(output_dir: str, model_name: str, ext: str) -> str:
 def decode_image_bytes(response_json: dict) -> bytes:
     """Extract and decode the base64 image from an Ollama generate response.
 
-    Tries images[0] first (Ollama diffusion models), then falls back to
-    the response field (older Ollama builds).
+    Tries 'image' (singular, current Ollama diffusion models), then 'images[0]',
+    then falls back to the 'response' field (older Ollama builds).
     """
+    image_b64 = response_json.get("image", "").strip()
+    if image_b64:
+        return base64.b64decode(image_b64)
     images = response_json.get("images")
     if images:
         return base64.b64decode(images[0])
