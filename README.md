@@ -1,6 +1,3 @@
-Here’s a clean, professional README.md tailored to your repo (ollama_image_gen) that aligns with your typical local-LLM + Streamlit + applied AI workflows. It’s structured so you can drop it directly into GitHub and refine later.
-
-⸻
 
 🖼️ Ollama Image Generation App
 
@@ -46,7 +43,6 @@ Ollama API (local)
 Image Generation Model
         ↓
 Output Image (saved/displayed)
-
 
 ⸻
 
@@ -94,7 +90,6 @@ Start Ollama:
 
 ollama serve
 
-
 ⸻
 
 🤖 Model Setup
@@ -134,7 +129,6 @@ python generate_image.py
 🧪 Example Prompt
 
 "A futuristic laboratory where scientists are using AI to design antibodies, highly detailed, cinematic lighting"
-
 
 ⸻
 
@@ -229,17 +223,3 @@ MIT License (or update as appropriate)
 Dylan Bulseco
 GitHub: https://github.com/dabulseco
 
-⸻
-
-💡 Vision
-
-This project is part of a broader effort to build:
-
-Fully local, agent-driven AI systems for scientific discovery, education, and workforce development
-
-⸻
-
-If you want, I can also:
-	•	Inspect your actual repo structure and tailor this precisely
-	•	Generate a matching requirements.txt
-	•	Add badges, screenshots, or a demo GIF for GitHub polish
