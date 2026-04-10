@@ -96,7 +96,7 @@ ollama serve
 
 Pull a compatible image or multimodal model:
 
-ollama pull <model-name>
+ollama pull <model-name> (tested on x/z-image-turbo and x/flux2-klein)
 
 Example (replace with actual supported models):
 
@@ -159,7 +159,7 @@ You can modify:
 ⚡ Performance Considerations
 
 Hardware	Expected Performance
-Apple Silicon (M1–M3)	Good for lightweight models
+Apple Silicon (M1–M5)	Good for lightweight models
 NVIDIA GPU (CUDA)	Best performance
 CPU-only	Slower but functional
 
@@ -179,7 +179,7 @@ This repo is intentionally minimal and can be extended into:
 
 3. Scientific Applications
 	•	Molecular visualization prompts
-	•	Antibody/biotech concept rendering
+	•	Antibody/biotech concept rendering (does not always render accurate images, especially for molecular structures)
 
 4. Multimodal Pipelines
 	•	Image → Text → Image loops
