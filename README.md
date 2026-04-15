@@ -1,3 +1,4 @@
+NOTE: As of Ollama 0.20.7, there is an incompability with Tahoe 26.4.1 so this code won't work. Some of the recommended work-arounds did not work for me. More info here: https://github.com/ollama/ollama/issues/15433
 
 🖼️ Ollama Image Generation App
 
